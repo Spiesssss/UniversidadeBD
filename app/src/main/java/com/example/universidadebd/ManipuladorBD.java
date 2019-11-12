@@ -13,45 +13,22 @@ import java.util.ArrayList;
 
 public class ManipuladorBD extends SQLiteOpenHelper {
     private static final String NOMEBD = "universidadeBD";
-    private static final int VERSAO = 0;
+    private static final int VERSAO = 1;
 
     public ManipuladorBD(@Nullable Context context) {
         super(context, NOMEBD, null, VERSAO);
     }
 
     @Override
-    public void onCreate(SQLiteDatabase sqLiteDatabase) {
+    public void onCreate(SQLiteDatabase bd) {
         //Chama o método que cria a tabela curso
-        criaTabelaCurso();
+        criaTabelaCurso(bd);
         //Chama o método que cria a tabela aluno.
-        criaTabelaAluno();
-        populaCurso();
+        criaTabelaAluno(bd);
+        populaCurso(bd);
 
     }
 
-
-    private void criaTabelaAluno() {
-        String sql = "CREATE TABLE ALUNO ("+
-                "matricula int PRIMARY KEY,"+
-                "nome varchar(200),"+
-                "cpf char(11) UNIQUE," +
-                "curso smallint,"+
-                "FOREIGN KEY (curso) REFERENCES CURSO(codigo)"+
-                ")";
-        SQLiteDatabase db = getWritableDatabase();
-        db.execSQL(sql);
-    }
-
-    private void criaTabelaCurso() {
-        String sql = "CREATE TABLE CURSO ("+
-                "codigo smallint PRIMARY KEY,"+
-                "nome varchar(200),"+
-                "descricao varchar(2000),"+
-                "duracao smallint)";
-
-        SQLiteDatabase bd = getWritableDatabase();
-        bd.execSQL(sql);
-    }
 
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int i, int i1) {
@@ -81,8 +58,27 @@ public class ManipuladorBD extends SQLiteOpenHelper {
         db.close();
     }
 
-    public void populaCurso(){
-        SQLiteDatabase db = getWritableDatabase();
+    private void criaTabelaAluno(SQLiteDatabase db) {
+        String sql = "CREATE TABLE ALUNO ("+
+                "matricula int PRIMARY KEY,"+
+                "nome varchar(200),"+
+                "cpf char(11) UNIQUE," +
+                "curso smallint,"+
+                "FOREIGN KEY (curso) REFERENCES CURSO(codigo)"+
+                ")";
+        db.execSQL(sql);
+    }
+
+    public void criaTabelaCurso(SQLiteDatabase bd) {
+        String sql = "CREATE TABLE CURSO ("+
+                "codigo smallint PRIMARY KEY,"+
+                "nome varchar(200),"+
+                "descricao varchar(2000),"+
+                "duracao smallint)";
+        bd.execSQL(sql);
+    }
+
+    public void populaCurso(SQLiteDatabase db){
         String sql = "INSERT INTO CURSO(nome,descricao,duracao)"+
                 "VALUES('Ciência da computação','curso foda pra caralho',"
                 +"5)";
@@ -91,7 +87,6 @@ public class ManipuladorBD extends SQLiteOpenHelper {
                 "VALUES('Direito','curso de advogados',"
                 +"5)";
         db.execSQL(sql);
-        db.close();
     }
 
     public void adicionaAluno(String nome, String cpf, int curso){
@@ -139,8 +134,8 @@ public class ManipuladorBD extends SQLiteOpenHelper {
                 Curso novoCurso = new Curso(nomeCurso,descricaoCurso,codigo,duracaoCurso);
                 cursosAtuais.add(novoCurso);
             } while (linha.moveToNext());
-            linha.close();
         }
+        linha.close();
         return cursosAtuais;
     }
 }
